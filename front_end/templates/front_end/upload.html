@@ -1,0 +1,38 @@
+{% extends "front_end/index.html" %}
+{% load static %}
+{% block title %}
+<title>Upload</title>
+{% endblock %}
+{% block content %}
+<nav>
+    <ul>
+      <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+      <li><a href="{% url 'upload' %}" class="active">Upload Data</a></li>
+      <li class="sign-out"><a href="{% url 'signin' %}">Sign Out</a></li>
+      <li class="updated-date">Last Updated<br>25 Oct 2025 8:00 PM</li>
+    </ul>
+</nav>
+<script src="{% static 'front_end/scripts.js'%}"></script>
+<div class="file-upload">
+    <div class="inner-container-upload">
+        <h1 class="upload-header">Upload File</h1>
+        <form method="post" action="{% url 'upload' %}" enctype="multipart/form-data" class="upload-file">
+            {% csrf_token %}
+            {{form}}
+            <button type="submit">Upload</button>
+            <p>{{ message }}</p>
+        </form>
+        <form method="post" class="model-params" action="{% url 'model' %}">
+            {% csrf_token %}
+            {{ model}}
+            <button type="submit" onclick="progress()">Run Model</button>
+        </form>
+        <div class="progress-container">
+            <div class="progress">
+                <div class="progress-bar"><p></p></div>
+            </div>  
+        </div>
+    </div>
+</div>
+
+{% endblock %}

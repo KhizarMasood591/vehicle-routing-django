@@ -1,0 +1,200 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {% block title %}<title>Dashboard</title>{% endblock %}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'front_end/styles.css' %}">
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <script src="https://cdn.plot.ly/plotly-3.1.0.min.js" charset="utf-8"></script>
+  </head>
+  <body>
+    <main>
+      {% block content%}
+        <nav>
+          <ul>
+            <li><a href="{% url 'dashboard' %}" class="active">Dashboard</a></li>
+            <li><a href="{% url 'upload' %}">Upload Data</a></li>
+            <li class="sign-out"><a href="{% url 'signin' %}">Sign Out</a></li>
+            <li class="updated-date">Last Updated<br>{{last_updated}}</li>
+          </ul>
+        </nav>
+        <section class="section1">
+          <div class="cards-container">
+            <div class="card-total-employess" id="card-content">
+             <h2>
+              {{total_employees}}
+             </h2>
+             <p>
+              Total Employees
+             </p>
+            </div>
+            <div class="card-total-buses" id="card-content">
+              <h2>
+                {{total_buses}}
+              </h2>
+              <p>Total Buses</p>
+            </div>
+            <div class="card-optimization" id="card-content">
+              <h2>
+                {{total_pickups}}
+              </h2>
+              <p>
+                Total Round Trips
+              </p>
+            </div>
+            <div class="card-total-distance" id="card-content">
+              <h2>
+                {{total_distance_travelled|floatformat:0}}
+              </h2>
+              <p>
+                Total Distance Travelled
+              </p>
+              <p>
+                KM
+              </p>
+            </div>
+          </div> 
+          <div class="cards-container-pickup-types">
+            <div class="card-pickup-type" id="card-content-pickup-types">
+              <h3>Vehicles Required</h3>
+              <table class="fixed vehicles-by-capacity">
+                <thead>
+                  <tr>
+                    <th>Shift Time</th>
+                    <th>Capacity 10</th>
+                    <th>Capacity 20</th>
+                    <th>Capacity 30</th>
+                    <th>Capacity Above 30</th>
+                  </tr>
+              </thead>
+              <tbody>
+                {% for key, value in capacity.items %}
+                  <tr>
+                    <td>{{key}}</td>
+                    <td>{{value.10}}</td>
+                    <td>{{value.20}}</td>
+                    <td>{{value.30}}</td>
+                    <td>{{value.Above_30}}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Total</th>
+                  <th>{{total_capacity.Total.10}}</th>
+                  <th>{{total_capacity.Total.20}}</th>
+                  <th>{{total_capacity.Total.30}}</th>
+                  <th>{{total_capacity.Total.Above_30}}</th>
+                </tr>
+              </tfoot>
+              </table>
+            </div>
+          </div>
+        </section>
+        <section class="section2">
+          <div class="utilization" id="utilization-guage">
+            <div class="inner-container-utilization", id="inner-utilization">
+            </div>
+          </div>
+          <script>
+            var data=[
+              {
+                value:"{{bus_utlization}}",
+                number: { suffix: "%" },
+                title:{text:"Bus Utilization"},
+                type:"indicator",
+                mode:"gauge+number",
+                gauge:{
+                  axis:{range:[0,100]},
+                  bgcolor:"#343A40",
+                  bar: { color: "#727CF5" }
+                }
+              }
+            ];
+            var layout={
+              paper_bgcolor:'rgba(0,0,0,0)',
+              plot_bgcolor:'rgba(0,0,0,0)',
+              font:{
+                color:"rgb(255, 255, 255)"
+              },
+              width:600,
+              color:"rgb(255, 255, 255)"
+            };
+            Plotly.newPlot('inner-utilization', data, layout);
+          </script>
+          <div class="distance-travelled">
+            <div id="distance-travelled-graph">
+              <div class="inner-distance-travelled" id="inner-distance-graph"></div>
+            </div>
+            <script>
+              var trace1 = {
+              x: JSON.parse("{{total_distance_bus.x|safe}}"),
+              y: JSON.parse("{{total_distance_bus.y|safe}}"),
+              name:'Pickups',
+              type:'bar',
+              marker:{
+                color:"#727CF5"
+              } 
+            };
+              var data = [trace1];
+              var layout = {
+                barcornerradius: 5,
+                title:{
+                  text:"Total Distance travelled by Bus"
+                },
+                paper_bgcolor:'rgba(0,0,0,0)',
+                plot_bgcolor:'rgba(0,0,0,0)',
+                font:{
+                  color:"rgb(255, 255, 255)",
+                },
+                yaxis:{
+                  title:{
+                    text:"KM"
+                  },
+                  showgrid:false,
+                  }
+              };
+              Plotly.newPlot( 'inner-distance-graph', data,layout);
+            </script>
+          </div>
+        </section>
+        <div class = "employees-on-bus">
+          <div id="employees-graph">
+            <div class="inner-container-employees" id="inner-employees-graph"></div>
+          </div>
+          <script>
+            var trace1 = {
+            x: JSON.parse("{{max_employees_bus.x|safe}}"),
+            y: JSON.parse("{{max_employees_bus.y|safe}}"),
+            name:'Pickups',
+            type:'bar',
+            marker:{
+              color:"#A645A0"
+            } 
+          };
+            var data = [trace1];
+            var layout = {
+              barcornerradius: 5,
+              title:{
+                text:"Max Employees on Bus by Bus"
+              },
+              paper_bgcolor:'rgba(0,0,0,0)',
+              plot_bgcolor:'rgba(0,0,0,0)',
+              font:{
+              color:"rgb(255, 255, 255)"
+            },
+            yaxis:{
+              showgrid:false
+            }
+            };
+            Plotly.newPlot( 'inner-employees-graph', data,layout);
+          </script>
+        </div>
+        {% endblock %}
+    </main>
+  </body>
+</html>

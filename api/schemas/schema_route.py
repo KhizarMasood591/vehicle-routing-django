@@ -1,0 +1,17 @@
+class SchemaRoute:
+    EMPLOYEE_ID = 'employee_id'
+    VEHICLE_ID = 'vehicle_id'
+    TRIP_TYPE = 'trip_type'
+    ACTION = 'action'
+    IN_BUS = 'in_bus'
+    ARRIVAL_TIME = 'arrival_time'
+    DISTANCE = 'distance'
+    LAT = 'lattitude'                
+    LON = 'longitude'
+    FROM_NODE = 'from'
+    TO_NODE = 'to'
+    RIDE_TIME = 'Ride_Time'
+    SHIFT_TIME = 'shift_time'
+    PICKUP_COUNT = 'pickup_drop_count'
+    UPLOAD_TIME = 'upload_time'
+    

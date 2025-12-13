@@ -1,0 +1,246 @@
+body{
+    background-color: #343A40;
+    font-family: "Poppins", sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+h1{
+    color: white;
+}
+.cards-container{
+    color: white;
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    padding: 5px;
+    gap: 10px;  
+}
+.cards-container-pickup-types{
+    display: flex;
+    color: white;
+    background-color:#37404A;
+    border-radius: 10px;
+    margin: 5px;
+    justify-content: center;
+    padding: 5px;
+}
+#card-content{
+    background-color: #37404A;
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px;
+    height: 180px;
+}
+section{
+    display: grid;
+    grid-template-columns: 1.5fr 2fr;
+    
+}
+div.card-pickup-type{
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+    width: 100%;
+    text-align: center;
+}
+#card-types-graph{
+    width:  650px;
+    height: 450px;
+}
+.card-types{
+    display: flex;
+    flex-direction: column;
+    text-align: center
+}
+div.card-types-dropoffs-trips{
+    color:#41B8D5;
+}
+div.card-types-pickup-trips{
+    color: #727CF5;
+}
+div.card-types-round-trips{
+    color: #A645A0;
+}
+.utilization{
+    color: white;
+    padding: 5px;
+}
+#inner-utilization{
+    display: flex;
+    justify-content: center;
+    background-color: #37404A;
+    border-radius: 10px;
+}
+#distance-travelled-graph{
+    padding: 5px;
+
+}
+.inner-distance-travelled{
+    display: flex;  
+    color: white;
+    background-color: #37404A;
+    border-radius: 10px;
+}
+tr{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    text-align: center;
+}
+#employees-graph{
+    padding: 5px;
+}
+.inner-container-employees{
+    background-color: #37404A;
+    border-radius: 10px;
+}
+div.login{
+    display: flex;
+    flex-direction: column;
+    color: white;
+    gap: 40px;
+    justify-content: center;
+    text-align: center;
+    margin-top:25%;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #37404A;
+    margin-bottom: 10%;
+}
+.routing-img{
+    height: 815px;
+    width: 50%;
+    padding: 0;
+}
+.login-page{
+    display: flex;
+    align-content: center;
+    gap: 100px;
+}
+.upload-btn{
+    color: white;
+    display: flex;
+    justify-content: right;
+}
+div.last-updated{
+    color: white;
+}
+h1.upload-header{
+    display: flex;
+    justify-content: center;
+}
+form.upload-file{
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    justify-content: center;
+    color: white;
+    align-items: center;
+}
+.inner-container-upload{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: #37404A;
+    align-items: center;
+    width: 50%;
+    padding: 50px;
+    border-radius: 10px;
+}
+div.file-upload{
+    color: white;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+
+}
+button{
+    height: fit-content;
+    background-color: #727CF5;
+    border-radius: 5px;
+    color: white;
+    font-size: 20px;
+}
+a{
+    text-decoration: none;
+    color: white;
+}
+form.model-params{
+    display: flex;
+    flex-direction:column;
+    gap: 30px;
+    justify-content: center;
+    color: white;
+}
+form.model-params input{
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    width: 100%;
+}
+.progress{
+    display: none;
+    height: 35px;
+    width: 200px;
+    background-color:#343A40;
+    border-radius: 35px;
+    border: 1px solid wheat;
+    align-items: center;
+}
+.progress-bar{
+    display: grid;
+    align-content: center;
+    height: 100%;
+    width: 0%;
+    background-color: #727df5f9;
+    border-radius: 35px;
+}
+.progress-bar p{
+    justify-self: center;
+}
+nav{
+    padding: 5px;
+}
+ul{
+    background-color: #37404A;
+    border-radius: 10px;
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+    align-items: center;
+    text-align: center;
+}
+.updated-date{
+    color: white;
+    margin-left: auto;
+    padding: 10px;
+}
+li a:hover{
+    background-color: #343A40;
+    padding: 20px;
+    border-radius: 10px;
+}
+.active{
+    background-color: #727CF5;
+    padding: 20px;
+    border-radius: 10px;
+}
+table{
+    width: 100%;
+    height: 350px;
+    display: block;
+    overflow:auto;
+    justify-content: center;
+    scrollbar-color: #37404A #343A40;
+}
+thead{
+    background:#343A40;
+    position: sticky;
+    top: 0px;
+}
+tfoot{
+    background:#343A40;
+    position: sticky;
+    bottom: 0px; 
+}

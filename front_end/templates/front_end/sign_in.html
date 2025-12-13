@@ -1,0 +1,24 @@
+{% extends "front_end/index.html" %}
+{% load static %}
+{% block title %}<title>Sign In</title>{% endblock %}
+{% block content %}
+<div class="login-page">
+    <img src="{% static 'front_end/routing.jpg'%}" class="routing-img">
+    <form action="{% url 'dashboard' %}" method="get"></form>
+    <div class="login">
+        <h2>Log in</h2>
+        <div class="username">
+            <label>Username</label>
+            <input type="text">
+        </div>
+        <div class="password">
+            <label>Password</label>
+            <input type="password">
+        </div>
+        <button type="submit"><a href="{% url 'dashboard' %}">Log In</a></button>
+    </div>
+    </form>
+</div>
+
+
+{% endblock %}
