@@ -119,7 +119,6 @@ class PipelineRoute:
         first_shift = shifts[i]
         vehicle_time_copy = self.vehicle_time.copy()
         vehicle_used = vehicle_time_copy[first_shift]
-        node_replacement = {}
         while i < len(shifts) - 1:
             shift_b = shifts[i+1]
             vehicle_shift_b = vehicle_time_copy[shift_b]
@@ -128,7 +127,6 @@ class PipelineRoute:
                     for idx,vehicle_b in enumerate(vehicle_shift_b):
                         for v_id, arrv in vehicle_b.items():
                             if arrival['End_time'] + matrix['time'][arrival['End_node']][arrv['Start_node']] <= arrv['Start_time']:
-                                node_replacement[v_id] = arrv['Start_node']
                                 vehicle[id]['End_node'] = arrv['End_node']  
                                 vehicle[id]['End_time'] = arrv['End_time']
                                 self.merged_route[v_id] = id
@@ -136,15 +134,20 @@ class PipelineRoute:
             vehicle_used = vehicle_used + vehicle_shift_b
             vehicle_shift_b.clear()
             i += 1
-        df_route[sr.TO_NODE] = df_route.apply(
-            lambda x : node_replacement[x[sr.VEHICLE_ID]] if (self.merged_route.get(x[sr.VEHICLE_ID]) == x[sr.VEHICLE_ID]) and (x[sr.FROM_NODE]==x[sr.TO_NODE]) else x[sr.TO_NODE],
-            axis=1  
-        ) 
         df_route[sr.VEHICLE_ID] = df_route[sr.VEHICLE_ID].apply(
             lambda x: x if self.merged_route.get(x) == None else self.merged_route.get(x)
-        )      
+        )  
         df_route = df_route.sort_values(by=[sr.VEHICLE_ID, sr.ARRIVAL_TIME])
-        # df_route[sr.VEHICLE_ID] = (df_route[sr.VEHICLE_ID] != df_route[sr.VEHICLE_ID].shift(1)).cumsum()
+        df_route = df_route.reset_index(drop=True)
+        mask = (df_route[sr.TO_NODE] == df_route[sr.TO_NODE].shift(1)) & (df_route[sr.VEHICLE_ID] == df_route[sr.VEHICLE_ID].shift(-1))
+        df_route['next'] = mask
+        df_route['NextFrom'] = df_route[sr.FROM_NODE].shift(-1)
+        # df_route[sr.TO_NODE] = df_route.apply(
+        #     lambda x: x['NextFrom'] if x['next'] else x[sr.TO_NODE],
+        #     axis=1
+        # )
+        # df_route = df_route.drop(columns=['NextFrom', 'next'])
+        df_route[sr.VEHICLE_ID] = (df_route[sr.VEHICLE_ID] != df_route[sr.VEHICLE_ID].shift(1)).cumsum()
         self.df_transformed = df_route
         return df_route
         

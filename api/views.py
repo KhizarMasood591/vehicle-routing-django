@@ -16,6 +16,7 @@ from api.measures import calulate_measures
 from django.db.models import Max
 from dataclasses import asdict
 import base64
+import datetime
 # Create your views here.
 
 
@@ -56,24 +57,23 @@ def run_model(request: request.HttpRequest):
         df_schedule_cleaned = pipeline.remove_outliers(distance_matrix.outliers)
         shift_times = sorted(df_schedule_cleaned[sr.SHIFT_TIME].unique())
         vehicle = 0
-        for shift in shift_times:
-                print(f"Generating Route for {shift}")
-                df_schedule_shift = df_schedule_cleaned[df_schedule_cleaned[sr.SHIFT_TIME]==shift]
-                if df_schedule_shift.empty:
-                        continue
-                df_clusters = pipeline.create_clusters(df_schedule_shift)
-                clusters = df_clusters['Clusters'].unique()
-                # for cluster in clusters:
-                # df_schedule_cluster = df_clusters[df_clusters['Clusters']==cluster]
+        # print(f"Generating Route for {shift}")
+        # df_schedule_shift = df_schedule_cleaned[df_schedule_cleaned[sr.SHIFT_TIME]==shift]
+        # if df_schedule_shift.empty:
+        #         continue
+        df_clusters = pipeline.create_clusters(df_schedule_cleaned)
+        clusters = df_clusters['Clusters'].unique()
+        for cluster in clusters:
+                print(f"Generating Route for {cluster}")
+                df_schedule_cluster = df_clusters[df_clusters['Clusters']==cluster]
                 routing_model = Routing(
-                        df_schedule_shift,
+                        df_schedule_cluster,
                         df_schedule_cleaned,
                         distance_matrix.matrix,
                         max_capacity,
                         vehicle,
                         ride_time
                         )
-                routing_model.shift_time = shift
                 routing_model.run_model()
                 vehicle = routing_model.vehicle_no
                 df_full_route = pd.concat([df_full_route, routing_model.route])
@@ -85,6 +85,35 @@ def run_model(request: request.HttpRequest):
                 "status": 200
         }
         return response.JsonResponse(data)
+        # for shift in shift_times:
+        #         print(f"Generating Route for {shift}")
+        #         df_schedule_shift = df_schedule_cleaned[df_schedule_cleaned[sr.SHIFT_TIME]==shift]
+        #         if df_schedule_shift.empty:
+        #                 continue
+        #         df_clusters = pipeline.create_clusters(df_schedule_shift)
+        #         clusters = df_clusters['Clusters'].unique()
+        #         # for cluster in clusters:
+        #         # df_schedule_cluster = df_clusters[df_clusters['Clusters']==cluster]
+        #         routing_model = Routing(
+        #                 df_schedule_shift,
+        #                 df_schedule_cleaned,
+        #                 distance_matrix.matrix,
+        #                 max_capacity,
+        #                 vehicle,
+        #                 ride_time
+        #                 )
+        #         routing_model.shift_time = shift
+        #         routing_model.run_model()
+        #         vehicle = routing_model.vehicle_no
+        #         df_full_route = pd.concat([df_full_route, routing_model.route])
+        # pipeline.transform_data(df_full_route,distance_matrix.matrix)
+        # pipeline.load_data()
+        # pipeline.df_transformed.to_excel("route.xlsx")
+        # data = {
+        #         "message": "Route has been sucessfully generated",
+        #         "status": 200
+        # }
+        # return response.JsonResponse(data)
 
 
 def metrics(request: request.HttpRequest):

@@ -30,11 +30,15 @@ class Routing:
         self.drop_df = self.df[[ss.SHIFT_TIME, pr.DROP_LAT, pr.DROP_LON, ss.TRIP_TYPE, ss.STAFF]]
         self.pickup_all = self.df_all[[ss.SHIFT_TIME, pr.PICKUP_LAT, pr.PICKUP_LON, ss.TRIP_TYPE, ss.STAFF]]
         self.drop_all = self.df_all[[ss.SHIFT_TIME, pr.DROP_LAT, pr.DROP_LON, ss.TRIP_TYPE, ss.STAFF]]
-        self.shift_time = None
         self.manager: pywrapcp.RoutingIndexManager = None
         self.routing: pywrapcp.RoutingModel = None
         self.capacity = capacity
 
+
+
+    @property
+    def shift_time(self):
+        return self.pickup_df[sr.SHIFT_TIME].to_list() + self.drop_df[sr.SHIFT_TIME].to_list()
 
     @property
     def trip_types(self):
@@ -227,7 +231,7 @@ class Routing:
             self.route[sr.PICKUP_COUNT] = self.route[sr.FROM_NODE].apply(
                 lambda x: self.demand[x]
             )
-            self.route[sr.SHIFT_TIME] = self.shift_time
+            self.route[sr.SHIFT_TIME] = self.route[sr.FROM_NODE].apply(lambda x : self.shift_time[x])
             self.route[sr.FROM_NODE] = self.route[sr.FROM_NODE].apply(
                 lambda x: self.indices[x]
             )
