@@ -19,7 +19,7 @@ class Routing:
             max_ride_time: int) -> None:
         self.df = dataframe
         self.df_all = df_all
-        self.number_of_vehicles = 100
+        self.number_of_vehicles = 150
         self.vehicle_no = vehicle_no
         self.route = pd.DataFrame()
         self.rows = []
@@ -33,12 +33,13 @@ class Routing:
         self.manager: pywrapcp.RoutingIndexManager = None
         self.routing: pywrapcp.RoutingModel = None
         self.capacity = capacity
-
+        self.shift_time = None
 
 
     @property
-    def shift_time(self):
-        return self.pickup_df[sr.SHIFT_TIME].to_list() + self.drop_df[sr.SHIFT_TIME].to_list()
+    def locations_name(self):
+        self.df_all
+
 
     @property
     def trip_types(self):
@@ -231,7 +232,6 @@ class Routing:
             self.route[sr.PICKUP_COUNT] = self.route[sr.FROM_NODE].apply(
                 lambda x: self.demand[x]
             )
-            self.route[sr.SHIFT_TIME] = self.route[sr.FROM_NODE].apply(lambda x : self.shift_time[x])
             self.route[sr.FROM_NODE] = self.route[sr.FROM_NODE].apply(
                 lambda x: self.indices[x]
             )
@@ -270,7 +270,8 @@ class Routing:
                     sr.IN_BUS : route_load,
                     sr.RIDE_TIME: routing.GetArcCostForVehicle(
                         previous_index, index, vehicle_id
-                    )
+                    ),
+                    sr.SHIFT_TIME : self.shift_time
                 }
                 self.rows.append(row)
             self.vehicle_no += 1

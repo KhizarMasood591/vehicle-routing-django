@@ -58,11 +58,11 @@ class PipelineRoute:
         df_filter_city = df[df[ss.CITY]==self.city]
         from_store = df_filter_city[df_filter_city[ss.TRIP_TYPE]=='From Store']
         group_from_store = from_store.groupby(
-            [ss.SHIFT_TIME, ss.ACC_LAT, ss.ACC_LON, ss.STORE_LAT, ss.STORE_LON]
+            [ss.SHIFT_TIME, ss.ACC_LAT, ss.ACC_LON, ss.STORE_LAT, ss.STORE_LON, ss.STORE_NAME,ss.ACC_NAME]
         )[ss.STAFF].sum().to_frame().reset_index()
         to_store = df_filter_city[df_filter_city[ss.TRIP_TYPE]=='To Store']
         group_to_store = to_store.groupby(
-            [ss.SHIFT_TIME, ss.ACC_LAT, ss.ACC_LON, ss.STORE_LAT, ss.STORE_LON]
+            [ss.SHIFT_TIME, ss.ACC_LAT, ss.ACC_LON, ss.STORE_LAT, ss.STORE_LON, ss.ACC_NAME, ss.STORE_NAME]
         )[ss.STAFF].sum().to_frame().reset_index()
         group_from_store = group_from_store.rename(
             columns={
@@ -95,58 +95,49 @@ class PipelineRoute:
             self,
             df_route: pd.DataFrame,
             matrix: dict) -> pd.DataFrame:
-        shifts = sorted(df_route[sr.SHIFT_TIME])
-        for shift in shifts:
-            shift_df = df_route[df_route[ss.SHIFT_TIME]==shift]
-            for bus_id in shift_df[sr.VEHICLE_ID].unique():
-                bus_df = shift_df[shift_df[sr.VEHICLE_ID]==bus_id]
-                if not bus_df.empty:
-                    last_node = bus_df.iloc[-1][sr.FROM_NODE]
-                    first_node = bus_df.iloc[0][sr.FROM_NODE]
-                    last_time = bus_df.iloc[-1][sr.ARRIVAL_TIME]
-                    first_time = bus_df.iloc[0][sr.ARRIVAL_TIME]
-                    self.vehicle_time[shift].append(
-                        {
-                            bus_id:{
-                                'Start_node': first_node,
-                                'End_node' : last_node,
-                                'Start_time' : first_time,
-                                'End_time': last_time
-                            }
-                        }
-                    )
-        i = 0
-        first_shift = shifts[i]
-        vehicle_time_copy = self.vehicle_time.copy()
-        vehicle_used = vehicle_time_copy[first_shift]
-        while i < len(shifts) - 1:
-            shift_b = shifts[i+1]
-            vehicle_shift_b = vehicle_time_copy[shift_b]
-            for vehicle in vehicle_used:
-                for id, arrival in vehicle.items():
-                    for idx,vehicle_b in enumerate(vehicle_shift_b):
-                        for v_id, arrv in vehicle_b.items():
-                            if arrival['End_time'] + matrix['time'][arrival['End_node']][arrv['Start_node']] <= arrv['Start_time']:
-                                vehicle[id]['End_node'] = arrv['End_node']  
-                                vehicle[id]['End_time'] = arrv['End_time']
-                                self.merged_route[v_id] = id
-                                vehicle_shift_b.pop(idx)
-            vehicle_used = vehicle_used + vehicle_shift_b
-            vehicle_shift_b.clear()
-            i += 1
-        df_route[sr.VEHICLE_ID] = df_route[sr.VEHICLE_ID].apply(
-            lambda x: x if self.merged_route.get(x) == None else self.merged_route.get(x)
-        )  
+        # shifts = sorted(df_route[sr.SHIFT_TIME])
+        # for shift in shifts:
+        #     shift_df = df_route[df_route[ss.SHIFT_TIME]==shift]
+        #     for bus_id in shift_df[sr.VEHICLE_ID].unique():
+        #         bus_df = shift_df[shift_df[sr.VEHICLE_ID]==bus_id]
+        #         if not bus_df.empty:
+        #             last_node = bus_df.iloc[-1][sr.FROM_NODE]
+        #             first_node = bus_df.iloc[0][sr.FROM_NODE]
+        #             last_time = bus_df.iloc[-1][sr.ARRIVAL_TIME]
+        #             first_time = bus_df.iloc[0][sr.ARRIVAL_TIME]
+        #             self.vehicle_time[shift].append(
+        #                 {
+        #                     bus_id:{
+        #                         'Start_node': first_node,
+        #                         'End_node' : last_node,
+        #                         'Start_time' : first_time,
+        #                         'End_time': last_time
+        #                     }
+        #                 }
+        #             )
+        # i = 0
+        # first_shift = shifts[i]
+        # vehicle_time_copy = self.vehicle_time.copy()
+        # vehicle_used = vehicle_time_copy[first_shift]
+        # while i < len(shifts) - 1:
+        #     shift_b = shifts[i+1]
+        #     vehicle_shift_b = vehicle_time_copy[shift_b]
+        #     for vehicle in vehicle_used:
+        #         for id, arrival in vehicle.items():
+        #             for idx,vehicle_b in enumerate(vehicle_shift_b):
+        #                 for v_id, arrv in vehicle_b.items():
+        #                     if arrival['End_time'] + matrix['time'][arrival['End_node']][arrv['Start_node']] <= arrv['Start_time']:
+        #                         vehicle[id]['End_node'] = arrv['End_node']  
+        #                         vehicle[id]['End_time'] = arrv['End_time']
+        #                         self.merged_route[v_id] = id
+        #                         vehicle_shift_b.pop(idx)
+        #     vehicle_used = vehicle_used + vehicle_shift_b
+        #     vehicle_shift_b.clear()
+        #     i += 1
+        # df_route[sr.VEHICLE_ID] = df_route[sr.VEHICLE_ID].apply(
+        #     lambda x: x if self.merged_route.get(x) == None else self.merged_route.get(x)
+        # )  
         df_route = df_route.sort_values(by=[sr.VEHICLE_ID, sr.ARRIVAL_TIME])
-        df_route = df_route.reset_index(drop=True)
-        mask = (df_route[sr.TO_NODE] == df_route[sr.TO_NODE].shift(1)) & (df_route[sr.VEHICLE_ID] == df_route[sr.VEHICLE_ID].shift(-1))
-        df_route['next'] = mask
-        df_route['NextFrom'] = df_route[sr.FROM_NODE].shift(-1)
-        # df_route[sr.TO_NODE] = df_route.apply(
-        #     lambda x: x['NextFrom'] if x['next'] else x[sr.TO_NODE],
-        #     axis=1
-        # )
-        # df_route = df_route.drop(columns=['NextFrom', 'next'])
         df_route[sr.VEHICLE_ID] = (df_route[sr.VEHICLE_ID] != df_route[sr.VEHICLE_ID].shift(1)).cumsum()
         self.df_transformed = df_route
         return df_route
@@ -155,14 +146,17 @@ class PipelineRoute:
     def create_clusters(self, df: pd.DataFrame):
         scores = []
         clusters = []
+        df['shift_time_mins'] = pd.to_datetime(df[ss.SHIFT_TIME], format='%H:%M:%S')
+        df['shift_time_mins'] = (df['shift_time_mins'].dt.hour * 60) + (df['shift_time_mins'].dt.minute)
         df_features = df[[
             PipelineRoute.PICKUP_LAT, PipelineRoute.PICKUP_LON, 
-            PipelineRoute.DROP_LAT, PipelineRoute.DROP_LON
+            PipelineRoute.DROP_LAT, PipelineRoute.DROP_LON,
+            'shift_time_mins'
         ]].to_numpy()
         standardscaler = StandardScaler()
         x_scaled = standardscaler.fit_transform(df_features)
         print(df.shape[0])
-        for cluster in range(2,6):
+        for cluster in range(2,10):
             if df.shape[0] <= cluster:
                 continue
             kmeans = KMeans(cluster, random_state=42).fit(x_scaled)
